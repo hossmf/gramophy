@@ -21,8 +21,6 @@ import javafx.stage.StageStyle;
  */
 public class Lyrica extends Application {
 
-
-    
     public static String version = "3.0";
     public static String songDirectory = "";
     public static String themeColor = "#7c43bd";
@@ -36,7 +34,6 @@ public class Lyrica extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("dashboard.fxml"));
-        
         Scene scene = new Scene(root);
         dashStage = stage;
         stage.initStyle(StageStyle.UNDECORATED);
@@ -94,8 +91,5 @@ public class Lyrica extends Application {
             console.pln("ERROR OCCURED");
             new criticalError("songLocation.dx NOT FOUND").setVisible(true);
         }
-
-        
     }
-    
 }

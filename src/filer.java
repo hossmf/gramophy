@@ -2,17 +2,13 @@ import java.nio.file.*;
 import java.io.*;
 
 public class filer {
-    public static String readFileAsString(String fileName) throws Exception
-    {
+    public static String readFileAsString(String fileName) throws Exception {
         String data = "";
-        try
-        {
+        try {
             console.pln("Reading Data from the file...");
-            data = new String(Files.readAllBytes(Paths.get(fileName)));        
+            data = new String(Files.readAllBytes(Paths.get(fileName)));
             console.pln(data);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             console.pln("");
             console.pln("Internal Error Occured!");
             console.pln("");
@@ -23,19 +19,16 @@ public class filer {
             //x.setProblem(e.getStackTrace());
             //x.setVisible(true);
         }
-
         return data;
     }
-    
-    public static boolean writeToFile(String fileName, String toBeWritten) throws Exception
-    {
+
+    public static boolean writeToFile(String fileName, String toBeWritten) throws Exception {
         boolean isSuccessful = true;
-        try
-        {
+        try {
             console.pln("Initializing FileOutputStream...");
             FileOutputStream o = new FileOutputStream(fileName);
             console.pln("Initializing OutputStreamWriter...");
-            OutputStreamWriter p = new OutputStreamWriter(o,"UTF-8");
+            OutputStreamWriter p = new OutputStreamWriter(o, "UTF-8");
             console.pln("Initializing BufferedWriter...");
             BufferedWriter q = new BufferedWriter(p);
             console.pln("Writing Data...");
@@ -44,30 +37,22 @@ public class filer {
             q.close();
             console.pln("Successfully Written!");
             isSuccessful = true;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             isSuccessful = false;
             console.pln("Unable to init Stream...");
             console.pln("Error Occurred!");
         }
-        
         return isSuccessful;
     }
-    
-    public boolean doesFileExists(String fileNamePassed)
-    {
+
+    public boolean doesFileExists(String fileNamePassed) {
         boolean toBeReturned;
-        try
-        {
+        try {
             String tmpData = new String(Files.readAllBytes(Paths.get(fileNamePassed)));
             toBeReturned = true;
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             toBeReturned = false;
         }
-        
         return toBeReturned;
     }
 }

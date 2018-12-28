@@ -1,13 +1,10 @@
 
-public class console
-{
-    public static void p(String textPassed)
-    {
+public class console {
+    public static void p(String textPassed) {
         System.out.print(textPassed);
     }
-    
-    public static void pln(String textPassed)
-    {
+
+    public static void pln(String textPassed) {
         System.out.println(textPassed);
     }
 }
