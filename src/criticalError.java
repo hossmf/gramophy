@@ -96,7 +96,6 @@ public class criticalError extends javax.swing.JFrame {
         console.pln("Quitting...");
         System.exit(0);
     }//GEN-LAST:event_jButton1ActionPerformed
-
     /**
      * @param args the command line arguments
      */
@@ -123,13 +122,8 @@ public class criticalError extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(criticalError.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new criticalError().setVisible(true);
-            }
-        });
+        java.awt.EventQueue.invokeLater(() -> new criticalError().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

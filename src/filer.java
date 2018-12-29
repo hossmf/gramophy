@@ -2,7 +2,7 @@ import java.nio.file.*;
 import java.io.*;
 
 public class filer {
-    public static String readFileAsString(String fileName) throws Exception {
+    public static String readFileAsString(String fileName) {
         String data = "";
         try {
             console.pln("Reading Data from the file...");

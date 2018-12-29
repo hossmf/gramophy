@@ -8,21 +8,6 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXProgressBar;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.*;
-import java.net.*;
-
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Paint;
-import org.json.JSONObject;
-
-import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ResourceBundle;
-
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -38,10 +23,18 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
-
 import javafx.util.Duration;
 import org.apache.commons.io.FilenameUtils;
+import org.json.JSONObject;
+
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ResourceBundle;
 
 /**
  * @author debayan
@@ -58,30 +51,23 @@ public class dashboardController implements Initializable {
     static String currentAlbum = "";
     static String currentArtist = "";
     static Double currentSongDuration = 0.00;
-
-
     static boolean isMusicInterfaceShown = false;
-
     double currentSongMinRaw;
     StringBuilder toBeChecked;
     int pointIndex;
     int min;
-
     boolean isFirstTimeUse = true;
     int c;
     boolean didPointCome = false;
     char currentChar;
     char currentChar2;
     char currentChar3;
-
     String tmpSongSeek = "";
     StringBuilder toBeShown = new StringBuilder();
     double secs;
     StringBuilder secString;
     String currentSongMinString;
-
     static int currentSongIndex = 0;
-
     MediaPlayer player = null;
 
     @FXML
@@ -204,20 +190,17 @@ public class dashboardController implements Initializable {
     @FXML
     private JFXButton repeatButton;
 
-    String fileNameAttr = "file://";
+    private String fileNameAttr = "file://";
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        repeatButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (!repeat) {
-                    repeat = true;
-                    repeatButton.setRipplerFill(Paint.valueOf("#f10c0c"));
-                } else {
-                    repeat = false;
-                    repeatButton.setRipplerFill(Paint.valueOf("#00d307"));
-                }
+        repeatButton.setOnMouseClicked(event -> {
+            if (!repeat) {
+                repeat = true;
+                repeatButton.setRipplerFill(Paint.valueOf("#f10c0c"));
+            } else {
+                repeat = false;
+                repeatButton.setRipplerFill(Paint.valueOf("#00d307"));
             }
         });
         versionLabel.setText("Version " + Lyrica.version);
@@ -239,12 +222,9 @@ public class dashboardController implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         refreshSeek();
         refreshSeek2();
-
         mainPane.toFront();
-
     }
 
     public void refreshSeek2() {
@@ -261,78 +241,27 @@ public class dashboardController implements Initializable {
                         toBeChecked.append(currentSongMinString.charAt(pointIndex + 1));
                         toBeChecked.append(currentSongMinString.charAt(pointIndex + 2));
                         secs = Double.parseDouble(toBeChecked.toString()) * 60.0;
-
                         StringBuilder secString = new StringBuilder();
                         if (secs < 10) {
                             secString.append("0");
-                            secString.append(Character.toString(Double.toString(secs).charAt(0)));
+                            secString.append(Double.toString(secs).charAt(0));
                         } else if (secs > 10) {
-                            secString.append(Character.toString(Double.toString(secs).charAt(0)));
-                            secString.append(Character.toString(Double.toString(secs).charAt(1)));
+                            secString.append(Double.toString(secs).charAt(0));
+                            secString.append(Double.toString(secs).charAt(1));
                         }
                         min = (int) (currentSongMinRaw + (currentSongMinRaw - Double.parseDouble(toBeChecked.toString())));
-
-
                         toBeShown = new StringBuilder();
                         toBeShown.append(min);
                         toBeShown.append(":");
                         toBeShown.append(secString.toString());
-                       
-                        
-                        /*
-                    PREVIOUS METHOD TO DETERMINE LENGTH
-                    DEPRECATED SINCE v1.3
-                    tmpSongSeek = Double.toString(player.getCurrentTime().toMinutes());
-                        toBeShown = new StringBuilder();
-                        boolean didPointCome = false;
-                        for(int cx = 0;cx< tmpSongSeek.length(); cx++)
-                        {
-                            currentChar = tmpSongSeek.charAt(cx);
-                            if(cx != tmpSongSeek.length()-1 && cx != tmpSongSeek.length()-2)
-                            {
-                                currentChar2 = tmpSongSeek.charAt(cx+1);
-                                currentChar3 = tmpSongSeek.charAt(cx+2);
-                            }
-                            
-                            if(tmpSongSeek.charAt(cx) == '.')
-                            {
-                    
-                                didPointCome = true;
-                                toBeShown.append(":");
-                                toBeShown.append(tmpSongSeek.charAt(cx+1));
-                                toBeShown.append(tmpSongSeek.charAt(cx+2));
-                                break;
-                            }
-            
-                if(didPointCome == false)
-                {
-                    toBeShown.append(tmpSongSeek.charAt(cx));
-                }
-                            
-                                                        
-                        }
-                        
-                        
-                        didPointCome = false;*/
-
-                        Platform.runLater(new Runnable() {
-                            public void run() {
-                                cL.setText(toBeShown.toString());
-                            }
-                        });
-
+                        Platform.runLater(() -> cL.setText(toBeShown.toString()));
                     }
-
-
                     try {
                         Thread.sleep(600);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
                 }
-
-
             }
         };
         Thread xx = new Thread(t2);
@@ -341,55 +270,39 @@ public class dashboardController implements Initializable {
     }
 
     public void refreshSeek() {
-
-
         Task t2 = new Task<Void>() {
             @Override
             public Void call() {
                 while (true) {
                     if (songSeek.isValueChanging() == false && isSongAlreadyPlaying && isSongAsigned) {
-
-
                         double c2 = player.getCurrentTime().toMinutes();
-
                         double s2 = (c2 / currentSongDuration) * 100;
-
                         songSeek.setValue(s2);
                         songLocationProgressBar.setProgress(s2 / 100);
-
-
                     }
-
-
                     try {
                         Thread.sleep(500);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
                 }
-
-
             }
         };
         Thread xx = new Thread(t2);
         xx.setDaemon(true);
         xx.start();
-
     }
 
-    static String tmpSongName = "";
-    static String tmpArtist = "";
-    static boolean isErrorx = false;
+    private static String tmpSongName = "";
+    private static String tmpArtist = "";
+    private static boolean isErrorx = false;
 
     @FXML
-    public void searchForSongs() throws IOException {
+    public void searchForSongs() {
         pBarLoading.setOpacity(1);
         loadingMusicFilesLabel.setOpacity(1);
-
         try {
             //Media tmpMedia = null;
-
             File folder = new File(Lyrica.songDirectory);
             File[] listOfFiles = folder.listFiles();
             int i;
@@ -398,67 +311,52 @@ public class dashboardController implements Initializable {
             for (i = 0; i < listOfFiles.length; i++) {
                 tmpFileNameExtension = FilenameUtils.getExtension(listOfFiles[i].getName());
                 if (listOfFiles[i].isFile() && tmpFileNameExtension.equalsIgnoreCase("mp3")) {
-
-
                     String songName = listOfFiles[i].getName();
                     String songNameToBeProcessed = stringToUrl(songName);
-
-
                     Media tmpMedia = new Media(fileNameAttr + Lyrica.songDirectory + "/" + songNameToBeProcessed);
                     player = new MediaPlayer(tmpMedia);
                     isErrorx = false;
-                    player.setOnReady(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            try {
-                                tmpSongName = tmpMedia.getMetadata().get("title").toString();
-                                tmpSongName = tmpSongName.replace(" ", "");
-                                tmpSongName = tmpSongName.replace(" ", "");
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            try {
-                                tmpArtist = tmpMedia.getMetadata().get("artist").toString().toString();
-                                tmpArtist = tmpArtist.replace(" ", "");
-                                tmpArtist = tmpArtist.replace(" ", "");
-                            } catch (Exception e) {
-                                isErrorx = true;
-                            }
-
-                            if (isErrorx) {
-                                Lyrica.albumArtList.add("NULL");
-                                console.pln("ERROR");
+                    player.setOnReady(() -> {
+                        try {
+                            tmpSongName = tmpMedia.getMetadata().get("title").toString();
+                            tmpSongName = tmpSongName.replace(" ", "");
+                            tmpSongName = tmpSongName.replace(" ", "");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            tmpArtist = tmpMedia.getMetadata().get("artist").toString();
+                            tmpArtist = tmpArtist.replace(" ", "");
+                            tmpArtist = tmpArtist.replace(" ", "");
+                        } catch (Exception e) {
+                            isErrorx = true;
+                        }
+                        if (isErrorx) {
+                            Lyrica.albumArtList.add("NULL");
+                            console.pln("ERROR");
+                        } else {
+                            filer f = new filer();
+                            if (f.doesFileExists("files/albumArt/" + tmpSongName + tmpArtist + ".png")) {
+                                Lyrica.albumArtList.add(System.getProperty("user.dir") + stringToUrl("/files/albumArt/" + tmpSongName + tmpArtist + ".png"));
                             } else {
-                                filer f = new filer();
-                                if (f.doesFileExists("files/albumArt/" + tmpSongName + tmpArtist + ".png")) {
-                                    Lyrica.albumArtList.add(System.getProperty("user.dir") + stringToUrl("/files/albumArt/" + tmpSongName + tmpArtist + ".png"));
-                                } else {
-                                    Lyrica.albumArtList.add("NULL");
-
-                                }
+                                Lyrica.albumArtList.add("NULL");
                             }
                         }
                     });
 
                     if (tmpFileNameExtension.equalsIgnoreCase("mp3")) {
-
                         Lyrica.songList.add(listOfFiles[i].getName());
                         tmpNoOfSongs++;
                     }
                 }
             }
             player = null;
-
             Lyrica.noOfSongs = tmpNoOfSongs;
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         pBarLoading.setOpacity(0);
         loadingMusicFilesLabel.setOpacity(0);
-
         if (Lyrica.noOfSongs == 0) {
             itsLonelyHereLabel.setOpacity(1);
             itsLonelyHere2Label.setOpacity(1);
@@ -469,7 +367,6 @@ public class dashboardController implements Initializable {
             mainPane.toFront();
             songListview.toBack();
         } else {
-
             checkForSongsButton.setDisable(true);
             songListview.getItems().clear();
             songListview.getItems().add("Song Name");
@@ -487,52 +384,37 @@ public class dashboardController implements Initializable {
     public void playSelectedSong() {
         int selected = (songListview.getSelectionModel().getSelectedIndex() - 1);
         if (selected != -1) {
-
             console.pln("SELECTED : " + Lyrica.songList.get(selected));
             playSong(Lyrica.songDirectory + "/" + Lyrica.songList.get(selected), Lyrica.songList.get(selected).toString(), selected);
         }
-
-
     }
 
     public void playSong(String fileName, String fileNameWithoutLocation, int songIndex) {
-
         currentSongIndex = songIndex;
         playPauseButtonImage.setImage(new Image(dashboardController.class.getResourceAsStream("/resources/pause.png")));
         playPauseButtonImage1.setImage(new Image(dashboardController.class.getResourceAsStream("/resources/pauseBlack.png")));
         cL.setOpacity(1);
         pauseStartButton.setDisable(false);
-
         totalMusicInfoLabel.setOpacity(1);
         stopButton.setOpacity(1);
-
         String fname = "asds";
-
         try {
             upDownButton.setDisable(false);
-
             fname = stringToUrl(fileName);
             console.pln(fname);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         console.pln("Album Art Location : " + Lyrica.albumArtList.get(songIndex).toString());
-
         if (Lyrica.albumArtList.get(songIndex).toString().equals("NULL")) {
             currentAlbumArt.setImage(new Image(dashboardController.class.getResourceAsStream("/resources/noAlbumArt.png")));
         } else {
             currentAlbumArt.setImage(new Image("file:///" + Lyrica.albumArtList.get(songIndex).toString()));
         }
 
-
         Media pick = new Media(fileNameAttr + fname);
-
         String tmpcurrentSongName = fileNameWithoutLocation.replace(".mp3", "");
         currentSongName = tmpcurrentSongName.replace(".MP3", "");
-
-
         if (isSongAlreadyPlaying) {
             player.stop();
         }
@@ -545,87 +427,77 @@ public class dashboardController implements Initializable {
             console.pln("Unable to play music file...");
             wasAvailable = false;
         }
-
-
         player.setOnEndOfMedia(
-                new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (repeat) {
-                            int newSongIndex = currentSongIndex;
-                            String newSong = Lyrica.songList.get(newSongIndex).toString();
-                            String songDirectory = Lyrica.songDirectory;
-                            console.pln("NEXT BUTTON CLICKED");
-                            playSong(songDirectory + "/" + newSong, newSong, newSongIndex);
-                            songListview.getSelectionModel().select(newSongIndex + 1);
-                            songListview.getFocusModel().focus(newSongIndex + 1);
-                            songListview.scrollTo(newSongIndex + 1);
-                        } else
-                            nextButtonClicked();
-                    }
+                () -> {
+                    if (repeat) {
+                        int newSongIndex = currentSongIndex;
+                        String newSong = Lyrica.songList.get(newSongIndex).toString();
+                        String songDirectory = Lyrica.songDirectory;
+                        console.pln("NEXT BUTTON CLICKED");
+                        playSong(songDirectory + "/" + newSong, newSong, newSongIndex);
+                        songListview.getSelectionModel().select(newSongIndex + 1);
+                        songListview.getFocusModel().focus(newSongIndex + 1);
+                        songListview.scrollTo(newSongIndex + 1);
+                    } else
+                        nextButtonClicked();
                 }
         );
-        player.setOnReady(new Runnable() {
+        player.setOnReady(() -> {
+            currentTitle = tmpcurrentSongName;
+            currentAlbum = "Unknown";
+            currentArtist = "Unknown Artist";
+            currentSongDuration = pick.getDuration().toMinutes();
+            currentSongMinString = Double.toString(currentSongDuration);
+            toBeChecked = new StringBuilder();
+            toBeChecked.append("0.");
+            pointIndex = currentSongMinString.indexOf(".");
+            toBeChecked.append(currentSongMinString.charAt(pointIndex + 1));
+            toBeChecked.append(currentSongMinString.charAt(pointIndex + 2));
+            secs = Double.parseDouble(toBeChecked.toString()) * 60.0;
 
-            @Override
-            public void run() {
-                currentTitle = tmpcurrentSongName;
-                currentAlbum = "Unknown";
-                currentArtist = "Unknown Artist";
-                currentSongDuration = pick.getDuration().toMinutes();
-                currentSongMinString = Double.toString(currentSongDuration);
-                toBeChecked = new StringBuilder();
-                toBeChecked.append("0.");
-                pointIndex = currentSongMinString.indexOf(".");
-                toBeChecked.append(currentSongMinString.charAt(pointIndex + 1));
-                toBeChecked.append(currentSongMinString.charAt(pointIndex + 2));
-                secs = Double.parseDouble(toBeChecked.toString()) * 60.0;
-
-                secString = new StringBuilder();
-                if (secs < 10) {
-                    secString.append("0");
-                    secString.append(Character.toString(Double.toString(secs).charAt(0)));
-                } else if (secs > 10) {
-                    secString.append(Character.toString(Double.toString(secs).charAt(0)));
-                    secString.append(Character.toString(Double.toString(secs).charAt(1)));
-                }
-                min = (int) (currentSongDuration + (currentSongDuration - Double.parseDouble(toBeChecked.toString())));
-                toBeShown = new StringBuilder();
-                toBeShown.append(min);
-                toBeShown.append(":");
-                toBeShown.append(secString.toString());
-                totalMusicInfoLabel.setText(toBeShown.toString());
-                console.pln("Song Duration :" + currentSongDuration);
-                try {
-                    currentTitle = pick.getMetadata().get("title").toString();
-                } catch (Exception e) {
-                    currentTitle = tmpcurrentSongName;
-                }
-                try {
-                    currentAlbum = pick.getMetadata().get("album").toString();
-                } catch (Exception e) {
-                    currentAlbum = "Unknown";
-                }
-                try {
-                    currentArtist = pick.getMetadata().get("artist").toString();
-                } catch (Exception e) {
-                    currentArtist = "Unknown Artist";
-                }
-
-                artistLabel.setText(currentArtist);
-                artistLabel.setOpacity(1);
-                refreshSongInfo(currentTitle, currentAlbum);
-                console.pln(pick.getMetadata().toString());
-                player.play();
-                isSongAlreadyPlaying = true;
-                isSongAsigned = true;
+            secString = new StringBuilder();
+            if (secs < 10) {
+                secString.append("0");
+                secString.append(Double.toString(secs).charAt(0));
+            } else if (secs > 10) {
+                secString.append(Double.toString(secs).charAt(0));
+                secString.append(Double.toString(secs).charAt(1));
             }
+            min = (int) (currentSongDuration + (currentSongDuration - Double.parseDouble(toBeChecked.toString())));
+            toBeShown = new StringBuilder();
+            toBeShown.append(min);
+            toBeShown.append(":");
+            toBeShown.append(secString.toString());
+            totalMusicInfoLabel.setText(toBeShown.toString());
+            console.pln("Song Duration :" + currentSongDuration);
+            try {
+                currentTitle = pick.getMetadata().get("title").toString();
+            } catch (Exception e) {
+                currentTitle = tmpcurrentSongName;
+            }
+            try {
+                currentAlbum = pick.getMetadata().get("album").toString();
+            } catch (Exception e) {
+                currentAlbum = "Unknown";
+            }
+            try {
+                currentArtist = pick.getMetadata().get("artist").toString();
+            } catch (Exception e) {
+                currentArtist = "Unknown Artist";
+            }
+
+            artistLabel.setText(currentArtist);
+            artistLabel.setOpacity(1);
+            refreshSongInfo(currentTitle, currentAlbum);
+            console.pln(pick.getMetadata().toString());
+            player.play();
+            isSongAlreadyPlaying = true;
+            isSongAsigned = true;
         });
     }
 
     @FXML
-    public void pauseStartButtonClicked(ActionEvent event) {
+    public void pauseStartButtonClicked() {
         if (isSongAlreadyPlaying) {
             playPauseButtonImage.setImage(new Image(dashboardController.class.getResourceAsStream("/resources/play.png")));
             playPauseButtonImage1.setImage(new Image(dashboardController.class.getResourceAsStream("/resources/playBlack.png")));
@@ -679,7 +551,7 @@ public class dashboardController implements Initializable {
     }
 
     @FXML
-    public void quitButtonClicked(ActionEvent event) {
+    public void quitButtonClicked() {
         console.pln("Quitting...");
         System.exit(0);
     }
@@ -734,7 +606,7 @@ public class dashboardController implements Initializable {
     }
 
     @FXML
-    public void aboutButtonClicked(ActionEvent event) {
+    public void aboutButtonClicked() {
         mainPane.setOpacity(0);
         aboutPane.setOpacity(1);
         musicInterfacePane.setOpacity(0);
@@ -748,7 +620,7 @@ public class dashboardController implements Initializable {
     }
 
     @FXML
-    public void aboutReturnButtonClicked(ActionEvent event) {
+    public void aboutReturnButtonClicked() {
         aboutPane.setStyle("-fx-opacity:0;");
         mainPane.setStyle("-fx-opacity:1;");
         musicInterfacePane.setStyle("-fx-opacity : 0;");
@@ -766,9 +638,8 @@ public class dashboardController implements Initializable {
     }
 
     @FXML
-    public void settingsButtonClicked(ActionEvent event) {
+    public void settingsButtonClicked() {
         mainPane.setOpacity(0);
-        ;
         settingsPane.setOpacity(1);
         aboutPane.setOpacity(0);
         musicInterfacePane.setOpacity(0);
@@ -781,7 +652,7 @@ public class dashboardController implements Initializable {
     }
 
     @FXML
-    public void settingsGoBackButtonClicked(ActionEvent event) {
+    public void settingsGoBackButtonClicked() {
         downloadingProgressBar.setOpacity(0);
         albumArtDownloadCurrentStatusLabel.setOpacity(0);
         mainPane.setOpacity(1);
@@ -794,12 +665,12 @@ public class dashboardController implements Initializable {
 
 
     @FXML
-    private void colorChooserClicked(ActionEvent event) {
+    private void colorChooserClicked() {
         applyChangesButton.setDisable(false);
     }
 
     @FXML
-    private void changeThemeColorButtonClicked(ActionEvent event) throws Exception {
+    private void changeThemeColorButtonClicked() throws Exception {
         String newThemeColor = colorChooser.getValue().toString();
         newThemeColor = newThemeColor.replace("0x", "#");
         newThemeColor = newThemeColor.replace("ff", "");
@@ -834,12 +705,12 @@ public class dashboardController implements Initializable {
 
 
     @FXML
-    private void minimizeDashButtonClicked(ActionEvent event) {
+    private void minimizeDashButtonClicked() {
         Lyrica.dashStage.setIconified(true);
     }
 
     @FXML
-    private void upDownButtonClicked(ActionEvent event) {
+    private void upDownButtonClicked() {
         if (!isMusicInterfaceShown) {
             isMusicInterfaceShown = true;
             aboutPane.setOpacity(0);
@@ -892,7 +763,7 @@ public class dashboardController implements Initializable {
                     output += "%20";
                 } else {
                     try {
-                        output += URLEncoder.encode(Character.toString(input.charAt(j)), "UTF-8");
+                        output += URLEncoder.encode(Character.toString(input.charAt(j)), StandardCharsets.UTF_8);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -901,7 +772,6 @@ public class dashboardController implements Initializable {
         }
         return output;
     }
-
 
     public String getAlbumArtLink(String currentArtistName, String currentTrackName) {
         String toBeReturned = "";
@@ -940,7 +810,7 @@ public class dashboardController implements Initializable {
     static int xc = 0;
 
     @FXML
-    public void downloadAlbumArtButtonClicked(ActionEvent event) {
+    public void downloadAlbumArtButtonClicked() {
         if (player != null) {
             player.stop();
             player = null;
@@ -967,124 +837,118 @@ public class dashboardController implements Initializable {
             String songUrl = stringToUrl(Lyrica.songDirectory + "/" + Lyrica.songList.get(jx));
             Media tmpMedia = new Media(fileNameAttr + songUrl);
             MediaPlayer tmpPlayer = new MediaPlayer(tmpMedia);
-            tmpPlayer.setOnReady(new Runnable() {
-                @Override
-                public void run() {
-                    xc++;
-                    String artistName = "";
-                    String trackName = "";
-                    boolean isError = false;
-                    try {
-                        artistName = tmpMedia.getMetadata().get("artist").toString();
-                    } catch (Exception e) {
-                        isError = true;
-                    }
-                    try {
-                        trackName = tmpMedia.getMetadata().get("title").toString();
-                    } catch (Exception e) {
-                        isError = true;
-                    }
-                    if (!isError) {
-                        console.p("Checking whether album Art is already present for " + trackName);
-                        console.pln("...");
-                        artistName = artistName.replace(" ", "");
-                        trackName = trackName.replace(" ", "");
-                        String tmpArtistName = artistName.replace(" ", "");
-                        String tmpTrackName = trackName.replace(" ", "");
-                        String finalAlbumArtPhotoName = "files/albumArt/" + tmpTrackName + tmpArtistName + ".png";
-                        console.pln(finalAlbumArtPhotoName);
-                        filer x = new filer();
-                        if (x.doesFileExists(finalAlbumArtPhotoName)) {
-                            console.pln("Album Art already present... no need to download!");
+            tmpPlayer.setOnReady(() -> {
+                xc++;
+                String artistName = "";
+                String trackName = "";
+                boolean isError = false;
+                try {
+                    artistName = tmpMedia.getMetadata().get("artist").toString();
+                } catch (Exception e) {
+                    isError = true;
+                }
+                try {
+                    trackName = tmpMedia.getMetadata().get("title").toString();
+                } catch (Exception e) {
+                    isError = true;
+                }
+                if (!isError) {
+                    console.p("Checking whether album Art is already present for " + trackName);
+                    console.pln("...");
+                    artistName = artistName.replace(" ", "");
+                    trackName = trackName.replace(" ", "");
+                    String tmpArtistName = artistName.replace(" ", "");
+                    String tmpTrackName = trackName.replace(" ", "");
+                    String finalAlbumArtPhotoName = "files/albumArt/" + tmpTrackName + tmpArtistName + ".png";
+                    console.pln(finalAlbumArtPhotoName);
+                    filer x = new filer();
+                    if (x.doesFileExists(finalAlbumArtPhotoName)) {
+                        console.pln("Album Art already present... no need to download!");
+                    } else {
+                        String albumArtLink = getAlbumArtLink(artistName, trackName);
+                        if (albumArtLink.equals("NaN")) {
+                            console.pln("NO SUITABLE ALBUM ART FOUND...");
                         } else {
-                            String albumArtLink = getAlbumArtLink(artistName, trackName);
-                            if (albumArtLink.equals("NaN")) {
-                                console.pln("NO SUITABLE ALBUM ART FOUND...");
-                            } else {
-                                boolean isErr = false;
-                                try {
-                                    URL urlx = new URL(albumArtLink);
-                                    InputStream in = new BufferedInputStream(urlx.openStream());
-                                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                                    byte[] buf = new byte[1024];
-                                    int n = 0;
-                                    while (-1 != (n = in.read(buf))) {
-                                        out.write(buf, 0, n);
-                                    }
-                                    out.close();
-                                    in.close();
-                                    byte[] response = out.toByteArray();
-                                    console.pln(finalAlbumArtPhotoName);
-                                    FileOutputStream fos = new FileOutputStream(finalAlbumArtPhotoName);
-                                    fos.write(response);
-                                    fos.close();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    isErr = true;
+                            boolean isErr = false;
+                            try {
+                                URL urlx = new URL(albumArtLink);
+                                InputStream in = new BufferedInputStream(urlx.openStream());
+                                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                                byte[] buf = new byte[1024];
+                                int n = 0;
+                                while (-1 != (n = in.read(buf))) {
+                                    out.write(buf, 0, n);
                                 }
+                                out.close();
+                                in.close();
+                                byte[] response = out.toByteArray();
+                                console.pln(finalAlbumArtPhotoName);
+                                FileOutputStream fos = new FileOutputStream(finalAlbumArtPhotoName);
+                                fos.write(response);
+                                fos.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                isErr = true;
+                            }
 
-                                if (isErr) {
-                                    noOfErrs++;
-                                    console.pln("Unable to download album Art...");
-                                } else {
-                                    console.pln("Downloaded image sucessfully!");
-                                }
+                            if (isErr) {
+                                noOfErrs++;
+                                console.pln("Unable to download album Art...");
+                            } else {
+                                console.pln("Downloaded image sucessfully!");
                             }
                         }
-                    } else {
-                        console.pln("File does not meet the minimum requirements for checking for album Art");
                     }
-                    if (xc == Lyrica.songList.size() - 1) {
-                        console.pln("Refreshing Album Art...");
-                        //refresh the album List
-                        int fx;
-                        for (fx = 0; fx < Lyrica.songList.size(); fx++) {
-                            String songUrlx = stringToUrl(Lyrica.songDirectory + "/" + Lyrica.songList.get(fx));
-                            Media tmpMediax = new Media(fileNameAttr + songUrlx);
-                            MediaPlayer vb = new MediaPlayer(tmpMediax);
-                            Lyrica.albumArtList.clear();
-                            vb.setOnReady(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean isErrorxy = false;
-                                    String tmpSongNam = "", tmpArtis = "";
-                                    try {
-                                        tmpSongNam = tmpMediax.getMetadata().get("title").toString();
-                                        tmpSongNam = tmpSongNam.replace(" ", "");
-                                        tmpSongNam = tmpSongNam.replace(" ", "");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    try {
-                                        tmpArtis = tmpMediax.getMetadata().get("artist").toString().toString();
-                                        tmpArtis = tmpArtis.replace(" ", "");
-                                        tmpArtis = tmpArtis.replace(" ", "");
-                                    } catch (Exception e) {
-                                        isErrorxy = true;
-                                        e.printStackTrace();
-                                    }
-                                    if (isErrorxy) {
-                                        Lyrica.albumArtList.add("NULL");
-                                        console.pln("ERROR");
-                                    } else {
-                                        console.pln("files/albumArt/" + tmpSongNam + tmpArtis + ".png");
-                                        filer f = new filer();
-                                        if (f.doesFileExists("files/albumArt/" + tmpSongNam + tmpArtis + ".png")) {
-                                            Lyrica.albumArtList.add(System.getProperty("user.dir") + stringToUrl("/files/albumArt/" + tmpSongNam + tmpArtis + ".png"));
-                                        } else {
-                                            Lyrica.albumArtList.add("NULL");
-                                        }
-                                    }
+                } else {
+                    console.pln("File does not meet the minimum requirements for checking for album Art");
+                }
+                if (xc == Lyrica.songList.size() - 1) {
+                    console.pln("Refreshing Album Art...");
+                    //refresh the album List
+                    int fx;
+                    for (fx = 0; fx < Lyrica.songList.size(); fx++) {
+                        String songUrlx = stringToUrl(Lyrica.songDirectory + "/" + Lyrica.songList.get(fx));
+                        Media tmpMediax = new Media(fileNameAttr + songUrlx);
+                        MediaPlayer vb = new MediaPlayer(tmpMediax);
+                        Lyrica.albumArtList.clear();
+                        vb.setOnReady(() -> {
+                            boolean isErrorxy = false;
+                            String tmpSongNam = "", tmpArtis = "";
+                            try {
+                                tmpSongNam = tmpMediax.getMetadata().get("title").toString();
+                                tmpSongNam = tmpSongNam.replace(" ", "");
+                                tmpSongNam = tmpSongNam.replace(" ", "");
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            try {
+                                tmpArtis = tmpMediax.getMetadata().get("artist").toString();
+                                tmpArtis = tmpArtis.replace(" ", "");
+                                tmpArtis = tmpArtis.replace(" ", "");
+                            } catch (Exception e) {
+                                isErrorxy = true;
+                                e.printStackTrace();
+                            }
+                            if (isErrorxy) {
+                                Lyrica.albumArtList.add("NULL");
+                                console.pln("ERROR");
+                            } else {
+                                console.pln("files/albumArt/" + tmpSongNam + tmpArtis + ".png");
+                                filer f = new filer();
+                                if (f.doesFileExists("files/albumArt/" + tmpSongNam + tmpArtis + ".png")) {
+                                    Lyrica.albumArtList.add(System.getProperty("user.dir") + stringToUrl("/files/albumArt/" + tmpSongNam + tmpArtis + ".png"));
+                                } else {
+                                    Lyrica.albumArtList.add("NULL");
                                 }
-                            });
-                        }
-
-                        returnButtonSettings.setDisable(false);
-                        quitButton.setDisable(false);
-                        downloadAlbumArtButton.setDisable(false);
-                        downloadingProgressBar.setOpacity(0);
-                        albumArtDownloadCurrentStatusLabel.setOpacity(0);
+                            }
+                        });
                     }
+
+                    returnButtonSettings.setDisable(false);
+                    quitButton.setDisable(false);
+                    downloadAlbumArtButton.setDisable(false);
+                    downloadingProgressBar.setOpacity(0);
+                    albumArtDownloadCurrentStatusLabel.setOpacity(0);
                 }
             });
         }

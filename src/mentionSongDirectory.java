@@ -1,9 +1,4 @@
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 
 /**
